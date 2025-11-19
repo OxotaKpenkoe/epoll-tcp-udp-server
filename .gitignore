@@ -1,0 +1,15 @@
+# Build artifacts
+build/
+*.o
+
+# CMake
+CMake*
+CMakeCache.txt
+CMakeFiles/
+
+# Temporary
+*.log
+*.tmp
+
+# Debian package
+*.deb

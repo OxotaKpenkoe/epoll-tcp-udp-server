@@ -1,0 +1,11 @@
+[Unit]
+Description=Epoll Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/simple-server 38080 38081
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
