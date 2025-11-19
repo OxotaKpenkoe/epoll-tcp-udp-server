@@ -1,39 +1,39 @@
 # Epoll TCP/UDP Server
 
-Асинхронный сервер на C++17 для обработки TCP и UDP подключений с использованием epoll мультиплексирования.
+Asynchronous C++17 server for handling TCP and UDP connections using the epoll event multiplexer.
 
-## Возможности
+## Features
 
-- Асинхронная обработка клиентов через epoll
-- Поддержка TCP и UDP протоколов
-- Обработка команд:
-  - `/time` - возврат текущего времени
-  - `/stats` - статистика подключений
-  - `/shutdown` - остановка сервера
-- Эхо-режим для обычных сообщений
+- Asynchronous client handling via epoll
+- Support for TCP and UDP protocols
+- Built-in commands:
+  - `/time` - return current server time
+  - `/stats` - show connection statistics
+  - `/shutdown` - stop the server
+- Echo mode for all non-command messages
 
-## Требования
+## Requirements
 
-- Ubuntu 24.04 или совместимый дистрибутив
-- g++ с поддержкой C++17
+- Ubuntu 24.04 or compatible Linux distribution
+- g++ with C++17 support
 - make
-- systemd (для установки как сервис)
+- systemd (optional, for running as a service)
 
-## Сборка
+## Build
 ```bash
 make
 ```
 
-## Запуск
+## Run
 ```bash
-# Запуск с параметрами по умолчанию (TCP: 38080, UDP: 38081)
+# Default run (TCP: 38080, UDP: 38081)
 make run
 
-# Или напрямую
+# Manual run
 ./build/simple-server <tcp_port> <udp_port>
 ```
 
-## Примеры использования
+## Usage Examples
 ```bash
 # TCP:
 echo "/stats" | nc 127.0.0.1 38080
@@ -42,36 +42,36 @@ echo "/stats" | nc 127.0.0.1 38080
 echo "/stats" | nc -u 127.0.0.1 38081
 ```
 
-## Установка в систему
+## Installation
 
-### Через .deb пакет:
+### Using .deb package:
 ```bash
-# Создать пакет
+# Build the package
 make deb
 
-# Установить
+# Install
 sudo dpkg -i simple-server_1.0.0_amd64.deb
 
-# Запустить сервис
+# Start service
 sudo systemctl start simple-server
 sudo systemctl status simple-server
 
-# Включить автозапуск
+# Enable auto-start
 sudo systemctl enable simple-server
 
-# Удалить
+# Remove
 sudo dpkg -r simple-server
 ```
 
-### Вручную:
+### Manual installation
 ```bash
-# Скопировать бинарник
+# Copy binary
 sudo cp build/simple-server /usr/local/bin/
 
-# Скопировать systemd unit
+# Copy systemd unit
 sudo cp simple-server.service /etc/systemd/system/
 
-# Запустить
+# Start service
 sudo systemctl daemon-reload
 sudo systemctl start simple-server
 sudo systemctl enable simple-server
