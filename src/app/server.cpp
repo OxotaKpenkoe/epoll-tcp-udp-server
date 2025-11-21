@@ -153,20 +153,23 @@ namespace simple_server
 
         void Server::handleUdpData()
         {
-            char buffer[4096];
-            sockaddr_in clientAddr;
-            ssize_t bytesRead = udpSocket_.receive(buffer, sizeof(buffer), clientAddr);
-            if (bytesRead <= 0)
+            while (true)
             {
-                return;
+                char buffer[4096];
+                sockaddr_in clientAddr;
+                ssize_t bytesRead = udpSocket_.receive(buffer, sizeof(buffer), clientAddr);
+                if (bytesRead <= 0)
+                {
+                    break;
+                }
+                std::string message(buffer, bytesRead);
+                if (!message.empty() && message.back() == '\n')
+                {
+                    message.pop_back();
+                }
+                std::string response = processMessage(message);
+                udpSocket_.send(response, clientAddr);
             }
-            std::string message(buffer, bytesRead);
-            if (!message.empty() && message.back() == '\n')
-            {
-                message.pop_back();
-            }
-            std::string response = processMessage(message);
-            udpSocket_.send(response, clientAddr);
         }
 
         std::string Server::processMessage(const std::string &message)

@@ -1,5 +1,5 @@
 #include <unistd.h>
-#include <arpa/inet.h> 
+#include <arpa/inet.h>
 #include <cstring>
 #include <cerrno>
 #include <iostream>
@@ -18,45 +18,65 @@ namespace simple_server
             {
                 socket_utils::closeSocket(fd_);
                 fd_ = -1;
-            }            
+            }
         }
 
         ssize_t ClientConnection::read()
         {
-            char buffer[4096];
-            auto bytesRead = recv(fd_, buffer, sizeof(buffer), 0);
-            if (bytesRead > 0)
+            ssize_t totalRead = 0;
+            while (true)
             {
-                readBuffer_.append(buffer, bytesRead);
-            }
-            else if (bytesRead == 0)
-            {
-                return 0;
-            }
-            else
-            {
-                if (errno == EAGAIN || errno == EWOULDBLOCK)
+                char buffer[4096];
+                auto bytesRead = recv(fd_, buffer, sizeof(buffer), 0);
+                if (bytesRead > 0)
+                {
+                    readBuffer_.append(buffer, bytesRead);
+                    totalRead += bytesRead;
+                }
+                else if (bytesRead == 0)
                 {
                     return 0;
                 }
                 else
                 {
-                    std::cerr << "TCP connection READ data failed: " << strerror(errno) << std::endl;
-                    return -1;
+                    if (errno == EAGAIN || errno == EWOULDBLOCK)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        std::cerr << "TCP connection READ data failed: " << strerror(errno) << std::endl;
+                        return -1;
+                    }
                 }
             }
-            return bytesRead;
+            return totalRead;
         }
 
         ssize_t ClientConnection::write(const std::string &data)
         {
-            auto bytesSent = send(fd_, data.c_str(), data.size(), 0); 
-            if (bytesSent == -1)
+            size_t totalSent = 0;
+            while (totalSent < data.size())
             {
-                std::cerr << "TCP connection SEND data failed: " << strerror(errno) << std::endl;
-                return -1;
+                auto bytesSent = send(fd_, data.c_str() + totalSent, data.size() - totalSent, 0);
+                if (bytesSent > 0)
+                {
+                    totalSent += bytesSent;
+                }
+                else if (bytesSent == -1)
+                {
+                    if (errno == EAGAIN || errno == EWOULDBLOCK)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        std::cerr << "TCP connection SEND data failed: " << strerror(errno) << std::endl;
+                        return -1;
+                    }
+                }
             }
-            return bytesSent;
+            return totalSent;
         }
 
         bool ClientConnection::checkIsMessageFull() const
@@ -83,9 +103,9 @@ namespace simple_server
 
         std::string ClientConnection::getClientInfo() const
         {
-            std::string info {inet_ntoa(address_.sin_addr)};
-            info+=":";
-            info+=std::to_string(ntohs(address_.sin_port));
+            std::string info{inet_ntoa(address_.sin_addr)};
+            info += ":";
+            info += std::to_string(ntohs(address_.sin_port));
             return info;
         }
 
